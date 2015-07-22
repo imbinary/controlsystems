@@ -7,15 +7,15 @@
 %Kd              Small Change    Decrease   Decrease       No Change
 
 Kp = 1;
-Kd = 1;
-Ki = 1;
+Kd = 0;
+Ki = 0;
 K = pid(Kp,Ki,Kd);
 
 %setup a lag compensator
 Kc = 1;  % choose Kc = 1
 Tl = 1;
 Tg = 0.05;
-B = 1.25;
+B = 1; % 1.25;
 s=tf('s');
 
 Gc = Kc*(s+1/Tg)/(s+1/(B*Tg)); % = 1 initially
@@ -44,5 +44,6 @@ t = 0:.01:100;
 % show unit ramp plot
 subplot(212), lsim(sys,t,t)
 title('Response to Unit Ramp Input')
-abs(1-dcgain(sys))
+sse = abs(1-dcgain(sys));
+fprintf('The sse is %f\n',sse);
 
