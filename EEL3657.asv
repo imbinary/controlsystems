@@ -20,8 +20,8 @@ Cl = (x+(1*A)/Tl)/(x+1/(Tl));    % lead
 Gh = (0.2*x +3.2)/((x+1)*(x+.8));  % plant
 c = (x+1/Tg)/(x+1/(b*Tg));   % lag
 kv = limit((x*c*P*Gh),0);
-% set Beta to that value
-B = double(solve(kv==5,b));
+B = solve(kv==5,b);
+
 
 %setup a lag compensator
 Kc = 1;  % choose Kc = 1
