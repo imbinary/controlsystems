@@ -32,7 +32,7 @@ syms x b;
 Px = Kp + Ki/x + Kd*x;              %pid 
 GHx = (0.2*x +3.2)/((x+1)*(x+.8));  % plant
 
-%%
+
 % design a lag controller pick Kc=1
 % find Kv
 Cg = (x+1/Tg)/(x+1/(b*Tg));         % lag
@@ -51,7 +51,6 @@ Cg = (x+1/Tg)/(x+1/(B*Tg));     % lag
 limit((x * Cg * Px * GHx),0)
 Kv = limit((x * Cg * Px * GHx),x,0);
 
-%%
 % Design a lead controller
 
 %setup the lead compensator using A found above
@@ -60,8 +59,6 @@ Cl = (x+(1*A)/Tl)/(x+1/(Tl));    % lead
 
 limit((x * Cg * Px * GHx),0)
 Kl = limit((x * Cg * Cl * Px * GHx),x,0);
-
-%%
 
 % show root locus
 figure() 

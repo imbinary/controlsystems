@@ -1,4 +1,19 @@
 
+% This LaTeX was auto-generated from MATLAB code.
+% To make changes, update the MATLAB code and republish this document.
+
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{color}
+
+\sloppy
+\definecolor{lightgray}{gray}{0.5}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+    
+    \begin{verbatim}
 %Setup a pid controller
 
 %CL RESPONSE     RISE TIME       OVERSHOOT  SETTLING TIME  S-S ERROR
@@ -29,12 +44,13 @@ P = pid(Kp,Ki,Kd);
 
 % stuff for solving
 syms x b;
-Px = Kp + Ki/x + Kd*x;              %pid 
+Px = Kp + Ki/x + Kd*x;              %pid
 GHx = (0.2*x +3.2)/((x+1)*(x+.8));  % plant
-
-%%
-% design a lag controller pick Kc=1
-% find Kv
+\end{verbatim}
+\begin{par}
+design a lag controller pick Kc=1 find Kv
+\end{par} \vspace{1em}
+\begin{verbatim}
 Cg = (x+1/Tg)/(x+1/(b*Tg));         % lag
 kc = limit((x * Cg * Px * GHx),0);
 
@@ -50,21 +66,35 @@ end
 Cg = (x+1/Tg)/(x+1/(B*Tg));     % lag
 limit((x * Cg * Px * GHx),0)
 Kv = limit((x * Cg * Px * GHx),x,0);
+\end{verbatim}
 
-%%
-% Design a lead controller
-
+        \color{lightgray} \begin{verbatim} 
+ans =
+ 
+0
+ 
+\end{verbatim} \color{black}
+    \begin{par}
+Design a lead controller
+\end{par} \vspace{1em}
+\begin{verbatim}
 %setup the lead compensator using A found above
 
 Cl = (x+(1*A)/Tl)/(x+1/(Tl));    % lead
 
 limit((x * Cg * Px * GHx),0)
 Kl = limit((x * Cg * Cl * Px * GHx),x,0);
+\end{verbatim}
 
-%%
-
+        \color{lightgray} \begin{verbatim} 
+ans =
+ 
+0
+ 
+\end{verbatim} \color{black}
+    \begin{verbatim}
 % show root locus
-figure() 
+figure()
 rlocus(P * Kc * Gc * Gl * GHs)
 hold on
 rlocus(GHs)
@@ -89,4 +119,31 @@ fprintf('The sse is %f\n',sse);
 fprintf('The overshoot is %f\n',S.Overshoot);
 fprintf('The settling time is %f\n',S.SettlingTime);
 fprintf('The value of Kv is %s\n',char(Kv));
+\end{verbatim}
 
+        \color{lightgray} \begin{verbatim}
+ans =
+ 
+      0.2 s^3 + 7.4 s^2 + 71.2 s + 64
+  ---------------------------------------
+  s^4 + 22.8 s^3 + 58.6 s^2 + 52.8 s + 16
+ 
+Continuous-time transfer function.
+
+For the new system shown above the following results. 
+The sse is 0.200000
+The overshoot is 16.441601
+The settling time is 3.977884
+The value of Kv is 0
+\end{verbatim} \color{black}
+    
+\includegraphics [width=4in]{EEL3657_01.eps}
+
+\includegraphics [width=4in]{EEL3657_02.eps}
+
+\includegraphics [width=4in]{EEL3657_03.eps}
+
+
+
+\end{document}
+    

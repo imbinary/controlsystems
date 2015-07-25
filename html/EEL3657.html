@@ -1,0 +1,261 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>EEL3657</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-07-25"><meta name="DC.source" content="EEL3657.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">%Setup a pid controller</span>
+
+<span class="comment">%CL RESPONSE     RISE TIME       OVERSHOOT  SETTLING TIME  S-S ERROR</span>
+<span class="comment">%Kp              Decrease        Increase   Small Change   Decrease</span>
+<span class="comment">%Ki              Decrease        Increase   Increase       Eliminate</span>
+<span class="comment">%Kd              Small Change    Decrease   Decrease       No Change</span>
+
+clc
+
+Kp = 1;     <span class="comment">% 1 for a no change PID</span>
+Kd = 0;     <span class="comment">% 0 for a no change PID</span>
+Ki = 0;     <span class="comment">% 0 for a no change PID</span>
+
+Kc = 1;     <span class="comment">% choose Kc = 1</span>
+Tl = 1;     <span class="comment">% T for lead compensation</span>
+Tg = 0.05;  <span class="comment">% T for lag compensation</span>
+A = 1;      <span class="comment">% alpha (1 for no change to initial system)</span>
+
+s=tf(<span class="string">'s'</span>);
+
+
+<span class="comment">% setup the PID control</span>
+K = pid(Kp,Ki,Kd);
+P=tf(K);
+
+
+<span class="comment">% find Kv</span>
+syms <span class="string">x</span> <span class="string">b</span>;
+Px = Kp + Ki/x + Kd*x;              <span class="comment">%pid</span>
+GHx = (0.2*x +3.2)/((x+1)*(x+.8));  <span class="comment">% plant</span>
+Cg = (x+1/Tg)/(x+1/(b*Tg));         <span class="comment">% lag</span>
+
+kv = limit((x.*Cg.*Px.*GHx),0);
+kv
+<span class="comment">% set Beta to that value</span>
+<span class="keyword">if</span> kv==0
+    B=1;
+<span class="keyword">else</span>
+    B = double(solve(kv==5,b));
+<span class="keyword">end</span>
+
+
+<span class="comment">%setup a lag compensator</span>
+
+Gc = (s+1/Tg)/(s+1/(B*Tg)); <span class="comment">% = 1 initially (lag)</span>
+Gl = (s+(1*A)/Tl)/(s+1/(Tl)); <span class="comment">% = 1 initially (lead)</span>
+GHs = (0.2*s +3.2)/((s+1)*(s+.8)); <span class="comment">% plant</span>
+
+Cg = (x+1/Tg)/(x+1/(B*Tg));     <span class="comment">% lag</span>
+Cl = (x+(1*A)/Tl)/(x+1/(Tl));    <span class="comment">% lead</span>
+
+limit((x*Cg*Px*GHx),0)
+Kv = limit((x * Cg * Cl * Px * GHx),x,0);
+
+
+<span class="comment">% show root locus</span>
+figure()
+rlocus(P*Kc*Gc*Gl*GHs)
+hold <span class="string">on</span>
+rlocus(GHs)
+sgrid
+hold <span class="string">off</span>
+figure()
+sys = feedback(P * Kc * Gc * Gl * GHs,1);
+
+<span class="comment">% show unit step plot</span>
+step(sys)
+t = 0:.01:100;
+figure()
+<span class="comment">% show unit ramp plot</span>
+lsim(sys,t,t)
+title(<span class="string">'Response to Unit Ramp Input'</span>)
+sse = abs(1-dcgain(sys));
+S = stepinfo(sys);
+
+tf(P * Kc * Gc * Gl * GHs)
+fprintf(<span class="string">'For the new system shown above the following results. \n'</span>);
+fprintf(<span class="string">'The sse is %f\n'</span>,sse);
+fprintf(<span class="string">'The overshoot is %f\n'</span>,S.Overshoot);
+fprintf(<span class="string">'The settling time is %f\n'</span>,S.SettlingTime);
+fprintf(<span class="string">'The value of Kv is %s\n'</span>,char(Kv));
+</pre><pre class="codeoutput"> 
+kv =
+ 
+0
+ 
+ 
+ans =
+ 
+0
+ 
+
+ans =
+ 
+      0.2 s^3 + 7.4 s^2 + 71.2 s + 64
+  ---------------------------------------
+  s^4 + 22.8 s^3 + 58.6 s^2 + 52.8 s + 16
+ 
+Continuous-time transfer function.
+
+For the new system shown above the following results. 
+The sse is 0.200000
+The overshoot is 16.441601
+The settling time is 3.977884
+The value of Kv is 0
+</pre><img vspace="5" hspace="5" src="EEL3657_01.png" alt=""> <img vspace="5" hspace="5" src="EEL3657_02.png" alt=""> <img vspace="5" hspace="5" src="EEL3657_03.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+
+%Setup a pid controller
+
+%CL RESPONSE     RISE TIME       OVERSHOOT  SETTLING TIME  S-S ERROR
+%Kp              Decrease        Increase   Small Change   Decrease
+%Ki              Decrease        Increase   Increase       Eliminate
+%Kd              Small Change    Decrease   Decrease       No Change
+
+clc
+
+Kp = 1;     % 1 for a no change PID
+Kd = 0;     % 0 for a no change PID
+Ki = 0;     % 0 for a no change PID
+
+Kc = 1;     % choose Kc = 1
+Tl = 1;     % T for lead compensation
+Tg = 0.05;  % T for lag compensation
+A = 1;      % alpha (1 for no change to initial system)
+
+s=tf('s');
+
+
+% setup the PID control
+K = pid(Kp,Ki,Kd);
+P=tf(K);
+
+
+% find Kv
+syms x b;
+Px = Kp + Ki/x + Kd*x;              %pid 
+GHx = (0.2*x +3.2)/((x+1)*(x+.8));  % plant
+Cg = (x+1/Tg)/(x+1/(b*Tg));         % lag
+
+kv = limit((x.*Cg.*Px.*GHx),0);
+kv
+% set Beta to that value
+if kv==0
+    B=1;
+else
+    B = double(solve(kv==5,b));
+end
+
+
+%setup a lag compensator
+
+Gc = (s+1/Tg)/(s+1/(B*Tg)); % = 1 initially (lag)
+Gl = (s+(1*A)/Tl)/(s+1/(Tl)); % = 1 initially (lead)
+GHs = (0.2*s +3.2)/((s+1)*(s+.8)); % plant
+
+Cg = (x+1/Tg)/(x+1/(B*Tg));     % lag
+Cl = (x+(1*A)/Tl)/(x+1/(Tl));    % lead
+
+limit((x*Cg*Px*GHx),0)
+Kv = limit((x * Cg * Cl * Px * GHx),x,0);
+
+
+% show root locus
+figure() 
+rlocus(P*Kc*Gc*Gl*GHs)
+hold on
+rlocus(GHs)
+sgrid
+hold off
+figure()
+sys = feedback(P * Kc * Gc * Gl * GHs,1);
+
+% show unit step plot
+step(sys)
+t = 0:.01:100;
+figure()
+% show unit ramp plot
+lsim(sys,t,t)
+title('Response to Unit Ramp Input')
+sse = abs(1-dcgain(sys));
+S = stepinfo(sys);
+
+tf(P * Kc * Gc * Gl * GHs)
+fprintf('For the new system shown above the following results. \n');
+fprintf('The sse is %f\n',sse);
+fprintf('The overshoot is %f\n',S.Overshoot);
+fprintf('The settling time is %f\n',S.SettlingTime);
+fprintf('The value of Kv is %s\n',char(Kv));
+
+
+##### SOURCE END #####
+--></body></html>
