@@ -14,7 +14,7 @@ clc
 
 Kp = 1;     % 1 for a no change PID
 Kd = 0;     % 0 for a no change PID
-Ki = 1;     % 0 for a no change PID
+Ki = 0;     % 0 for a no change PID
 
 Kc = 1;     % choose Kc = 1 20
 Tl = 1;     % T for lead compensation
@@ -38,11 +38,39 @@ GHx = (0.2*x +3.2)/((x+1)*(x+.8));  % plant
 
 %%
 % PID design
-tmp = GHx/(1+GHx * Px);
-pretty(tmp)
-
+tmp = feedback(GHs,1);
+figure();
+SO = stepinfo(tmp);
+step(tmp);
+hold on
+KP = 1;
+KI = 0;
+KD = 0;
+for KP = 1:.5:3
+    for KI = 1:.5:3
+        for KD = 1:.5:3
+            P = pid(KP,KI,KD);
+            tmp = feedback(P * GHs,1);
+            S = stepinfo(tmp);
+            sse = abs(1-dcgain(tmp));
+            i=1;
+            if S.Overshoot < 10 && S.Overshoot <= SO.Overshoot && sse < 0.01 && S.SettlingTime < 8 && S.SettlingTime <= SO.SettlingTime
+                SO = S;
+                Ki=KI;
+                Kp=KP;
+                Kd=KD;
+                %Names(i,3)=num2str(Kp);
+                step(tmp);
+                i=i+1;
+            end
+        end
+    end
+end
+%Names
+title('Candidate PID controls')
+hold off
 Px = Kp + Ki/x + Kd*x;              %pid 
-P = pid(Kp,Ki,Kd)
+P = pid(Kp,Ki,Kd);
 
 
 %%
@@ -56,7 +84,7 @@ if limit((x * Cg * Px * GHx),x,0) == 0
 else
     B = double(solve(limit((x * Cg * Px * GHx),x,0)==5,b));
 end
-
+%B=1
 %setup the lag compensator using B found above
 Cg = (x+1/Tg)/(x+1/(B*Tg));     % lag
 limit((x * Cg * Px * GHx),0)
@@ -99,6 +127,8 @@ S = stepinfo(sys);
 tf(P * Kc * Gc * Gl * GHs)
 fprintf('For the new system shown above the following results. \n');
 fprintf('The sse is %f\n',sse);
+fprintf('The Kp, Ki, and Kd are (%0.2f, %0.2f, %0.2f)\n',Kp,Ki,Kd);
+fprintf('The Beta is %f\n',B);
 fprintf('The overshoot is %f%%\n',S.Overshoot);
 fprintf('The settling time is %f\n',S.SettlingTime);
 fprintf('The value of Kv is %s\n',char(Kv));
