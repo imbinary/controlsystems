@@ -9,53 +9,60 @@
 Kp = 1;
 Kd = 1;
 Ki = 1;
-K = pid(Kp,Ki,Kd);
-k=tf(K);
+s=tf('s');
+GH = (0.2*s +3.2)/((s+1)*(s+.8));
+
+%%
+% solve PID control
+z=-log(.10)/sqrt(pi^2+log(.10)^2);
+wn=4/(8*z);
+N=[0 0 wn^2];
+D=[1 2*wn*z wn^2];
+p= roots(D);
+
+S1 = p(1);
+syms kd kp x
+GHs = (0.2*S1 +3.2)/((S1+1)*(S1+.8));
+%1+P*GHs=0, P = Kp + Kd*s +Ki/s
+%Kp + Kd*S1 = -1/GHs-Ki/(S1)
+% Ki = .1 small
+% use imaginary part to solve Kd
+Kd = sym2poly(solve(imag(S1)*kd==imag(-1/GHs-Ki/(S1)),kd));
+%use real part to solve Kp
+Kp = sym2poly(solve(kp+real(S1)*Kd==real(-1/GHs-Ki/(S1)),kp));
+P = Kp+Kd*s+Ki/s;
 
 
+%%
 % find Kv
-syms x b;
-P = Kp + Ki/x + Kd*x;           %pid 
-Cl = (x+(1*A)/Tl)/(x+1/(Tl));    % lead
+syms b;
+Kc = 1;  % choose Kc = 1
+Tg = 0.05;
+
+Px = Kp + Ki/x + Kd*x;           %pid generated above
 Gh = (0.2*x +3.2)/((x+1)*(x+.8));  % plant
 c = (x+1/Tg)/(x+1/(b*Tg));   % lag
-kv = limit((x*c*P*Gh),0);
+kv = limit((x*c*Px*Gh),0);
 % set Beta to that value
 B = double(solve(kv==5,b));
 
 %setup a lag compensator
-Kc = 1;  % choose Kc = 1
-Tl = 1;
-Tg = 0.05;
-%B = 1.25; % 1.25;
-A = 1;
-s=tf('s');
 
+%B = 1.25; % 1.25;
 Gc = (s+1/Tg)/(s+1/(B*Tg)); % = 1 initially (lag)
 
-Gl = (s+(1*A)/Tl)/(s+1/(Tl)); % = 1 initially (lead)
-
-GH = (0.2*s +3.2)/((s+1)*(s+.8));
-
-
-P = Kp + Ki/x + Kd*x;           %pid
 Cg = (x+1/Tg)/(x+1/(B*Tg));     
-Cl = (x+(1*A)/Tl)/(x+1/(Tl));    % lead
-Gh = (0.2*x +3.2)/((x+1)*(x+.8));  % plant
-c = (x+1/Tg)/(x+1/(b*Tg));   % lag
-limit((x*c*P*Gh),0)
-Kv = limit((x * Cg * Cl * P * Gh),x,0);
+
+limit((x*c*Px*Gh),0)
+Kv = limit((x * Cg * Px * Gh),x,0);
 fprintf('The value of Kv is %s\n',char(Kv));
 
 % show root locus
 figure() 
-rlocus(k*Kc*Gc*Gl*GH)
-hold on
-rlocus(GH)
+rlocus(P*Gc*GH)
 sgrid
-hold off
 figure()
-sys = feedback(k * Kc * Gc * Gl * GH,1);
+sys = feedback(P * Gc * GH,1);
 
 % show unit step plot
 step(sys)
@@ -67,4 +74,4 @@ title('Response to Unit Ramp Input')
 sse = abs(1-dcgain(sys));
 fprintf('The sse is %f\n',sse);
 
-tf(k * Kc * Gc * Gl * GH,1)
+minreal(tf(P * Gc * GH,1))
