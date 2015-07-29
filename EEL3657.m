@@ -12,6 +12,7 @@ clear all
 close all
 clc
 
+<<<<<<< HEAD
 Kp = 1;     % 1 for a no change PID
 Kd = 0;     % 0 for a no change PID
 Ki = 0;     % 0 for a no change PID
@@ -98,6 +99,58 @@ Kv = limit((x * Cg * Px * GHx),x,0);
 % setup the lead compensator using A found above
 
 Cl = (x+(1*A)/Tl)/(x+1/(Tl));    % lead
+=======
+Kp = 1;
+Kd = 1;
+Ki = 1;
+s=tf('s');
+GH = (0.2*s +3.2)/((s+1)*(s+.8));
+
+%%
+% solve PID control
+z=-log(.10)/sqrt(pi^2+log(.10)^2);
+wn=4/(8*z);
+N=[0 0 wn^2];
+D=[1 2*wn*z wn^2];
+p= roots(D);
+
+S1 = p(1);
+syms kd kp x
+GHs = (0.2*S1 +3.2)/((S1+1)*(S1+.8));
+%1+P*GHs=0, P = Kp + Kd*s +Ki/s
+%Kp + Kd*S1 = -1/GHs-Ki/(S1)
+% Ki = .1 small
+% use imaginary part to solve Kd
+Kd = sym2poly(solve(imag(S1)*kd==imag(-1/GHs-Ki/(S1)),kd));
+%use real part to solve Kp
+Kp = sym2poly(solve(kp+real(S1)*Kd==real(-1/GHs-Ki/(S1)),kp));
+P = Kp+Kd*s+Ki/s;
+
+
+%%
+% find Kv
+syms b;
+Kc = 1;  % choose Kc = 1
+Tg = 0.05;
+
+Px = Kp + Ki/x + Kd*x;           %pid generated above
+Gh = (0.2*x +3.2)/((x+1)*(x+.8));  % plant
+c = (x+1/Tg)/(x+1/(b*Tg));   % lag
+kv = limit((x*c*Px*Gh),0);
+% set Beta to that value
+B = double(solve(kv==5,b));
+
+%setup a lag compensator
+
+%B = 1.25; % 1.25;
+Gc = (s+1/Tg)/(s+1/(B*Tg)); % = 1 initially (lag)
+
+Cg = (x+1/Tg)/(x+1/(B*Tg));     
+
+limit((x*c*Px*Gh),0)
+Kv = limit((x * Cg * Px * Gh),x,0);
+fprintf('The value of Kv is %s\n',char(Kv));
+>>>>>>> 11e4b6008e11ac72eac206a0c42d01a7a410ce2d
 
 limit((x * Cg * Px * GHx),0)
 Kl = limit((x * Cg * Cl * Px * GHx),x,0);
@@ -106,13 +159,20 @@ Kl = limit((x * Cg * Cl * Px * GHx),x,0);
 % show data
 % show root locus
 figure() 
+<<<<<<< HEAD
 rlocus(P * Kc * Gc * Gl * GHs)
 hold on
+=======
+rlocus(P*Gc*GH)
+>>>>>>> 11e4b6008e11ac72eac206a0c42d01a7a410ce2d
 sgrid
-hold off
 figure()
+<<<<<<< HEAD
 
 sys = feedback(P * Kc * Gc * Gl * GHs,1);
+=======
+sys = feedback(P * Gc * GH,1);
+>>>>>>> 11e4b6008e11ac72eac206a0c42d01a7a410ce2d
 
 % show unit step plot
 step(sys)
@@ -133,3 +193,7 @@ fprintf('The overshoot is %f%%\n',S.Overshoot);
 fprintf('The settling time is %f\n',S.SettlingTime);
 fprintf('The value of Kv is %s\n',char(Kv));
 
+<<<<<<< HEAD
+=======
+minreal(tf(P * Gc * GH,1))
+>>>>>>> 11e4b6008e11ac72eac206a0c42d01a7a410ce2d
